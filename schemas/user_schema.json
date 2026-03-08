@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UserResponse",
+  "type": "object",
+  "required": ["data"],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": ["id", "email", "first_name", "last_name", "is_active"],
+      "properties": {
+        "id": { "type": "integer", "minimum": 1 },
+        "email": { "type": "string", "format": "email" },
+        "first_name": { "type": "string", "minLength": 1 },
+        "last_name": { "type": "string", "minLength": 1 },
+        "is_active": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

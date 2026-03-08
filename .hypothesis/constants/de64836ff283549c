@@ -1,0 +1,4 @@
+# file: /Users/alex.lechtchinski/mywork_repos/api-test-async/clients/api_client.py
+# hypothesis_version: 6.151.9
+
+[0.2, 10.0, 401, 429, 500, 502, 503, 504, 'Authorization', 'DELETE', 'GET', 'PATCH', 'POST', 'PUT', 'api_client', '→ %s %s | body: %s']

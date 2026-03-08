@@ -1,0 +1,4 @@
+# file: /Users/alex.lechtchinski/mywork_repos/api-test-async/models/auth_models.py
+# hypothesis_version: 6.151.9
+
+['Bearer', 'organizationId']

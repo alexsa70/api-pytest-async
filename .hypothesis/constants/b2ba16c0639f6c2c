@@ -1,0 +1,4 @@
+# file: /Users/alex.lechtchinski/mywork_repos/api-test-async/services/organizations_v1_service.py
+# hypothesis_version: 6.151.9
+
+[200, 204, 'Admin Portal', 'Authorization', 'x-request-origin']
