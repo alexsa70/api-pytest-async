@@ -1,20 +1,12 @@
 from __future__ import annotations
 
 import json
-from collections.abc import AsyncIterator
 
 import httpx
 import pytest
-import pytest_asyncio
 
-from clients.api_client import APIClient
 from config.settings import Settings
-from models.user_models import User
-from services.organizations_service import OrganizationsService
-from services.organizations_v1_service import OrganizationsV1Service
-from services.organizations_v2_service import OrganizationsV2Service
-from services.users_service import UsersService
-from tests.fixtures.auth import AuthSession
+from models.users.models import User
 from utils.endpoints import AUTH_LOGIN, ORGANIZATIONS, USERS
 
 
@@ -55,6 +47,7 @@ def mock_transport(
         if not _is_authorized(request):
             return httpx.Response(status_code=401, json={"detail": "Unauthorized"})
 
+        # Reference template routes for future user endpoints.
         if request.url.path == USERS and request.method == "GET":
             if request.url.params.get("trigger") == "500":
                 return httpx.Response(status_code=500, json={"detail": "Internal error"})
@@ -67,7 +60,6 @@ def mock_transport(
         if request.url.path == USERS and request.method == "POST":
             if request.headers.get("X-Role") == "guest":
                 return httpx.Response(status_code=403, json={"detail": "Forbidden"})
-
             if request.content == b"":
                 return httpx.Response(status_code=400, json={"detail": "Bad request"})
 
@@ -75,7 +67,6 @@ def mock_transport(
             required = {"email", "first_name", "last_name"}
             if not required.issubset(body.keys()):
                 return httpx.Response(status_code=422, json={"detail": "Validation error"})
-
             if body.get("first_name") == "Trigger500":
                 return httpx.Response(status_code=500, json={"detail": "Internal error"})
 
@@ -88,10 +79,8 @@ def mock_transport(
             user_id_segment = request.url.path.split("/")[-1]
             if user_id_segment == "forbidden":
                 return httpx.Response(status_code=403, json={"detail": "Forbidden"})
-
             if user_id_segment == "500":
                 return httpx.Response(status_code=500, json={"detail": "Internal error"})
-
             try:
                 user_id = int(user_id_segment)
             except ValueError:
@@ -107,13 +96,10 @@ def mock_transport(
                 return httpx.Response(status_code=400, json={"detail": "Bad request"})
 
             body = json.loads(request.content.decode("utf-8"))
-
             if not body.get("name"):
                 return httpx.Response(status_code=422, json={"detail": "Validation error"})
-
             if request.headers.get("X-Role") == "guest":
                 return httpx.Response(status_code=403, json={"detail": "Forbidden"})
-
             if body.get("name") == "Trigger500":
                 return httpx.Response(status_code=500, json={"detail": "Internal error"})
 
@@ -129,109 +115,3 @@ def mock_transport(
         return httpx.Response(status_code=404, json={"detail": "Route not found"})
 
     return httpx.MockTransport(handler)
-
-
-_MOCK_BASE_URL = "http://test"
-
-
-@pytest_asyncio.fixture
-async def api_client(
-    settings: Settings,
-    mock_transport: httpx.MockTransport,
-    auth_session: AuthSession,
-) -> AsyncIterator[APIClient]:
-    client = APIClient(
-        base_url=_MOCK_BASE_URL,
-        timeout=settings.api_timeout,
-        headers={"Content-Type": "application/json"},
-        transport=mock_transport,
-        auth_token_getter=auth_session.get_token,
-        auth_token_refresher=auth_session.refresh_token,
-        retries=settings.api_retries,
-        retry_backoff=settings.api_retry_backoff,
-    )
-    try:
-        yield client
-    finally:
-        await client.close()
-
-
-@pytest_asyncio.fixture
-async def users_service(api_client: APIClient) -> UsersService:
-    return UsersService(api_client)
-
-
-@pytest_asyncio.fixture
-async def integration_client(settings: Settings) -> AsyncIterator[APIClient]:
-    client = APIClient(
-        base_url=settings.api_base_url,
-        timeout=settings.api_timeout,
-        retries=settings.api_retries,
-        retry_backoff=settings.api_retry_backoff,
-    )
-    try:
-        yield client
-    finally:
-        await client.close()
-
-
-@pytest_asyncio.fixture
-async def integration_users_service(integration_client: APIClient) -> UsersService:
-    return UsersService(integration_client)
-
-
-@pytest_asyncio.fixture
-async def organizations_service(api_client: APIClient) -> OrganizationsService:
-    return OrganizationsService(api_client)
-
-
-@pytest_asyncio.fixture
-async def integration_organizations_service(
-    settings: Settings,
-    integration_auth_session: AuthSession,
-) -> AsyncIterator[OrganizationsService]:
-    client = APIClient(
-        base_url=settings.api_base_url,
-        timeout=settings.api_timeout,
-        retries=settings.api_retries,
-        retry_backoff=settings.api_retry_backoff,
-        auth_token_getter=integration_auth_session.get_token,
-        auth_token_refresher=integration_auth_session.refresh_token,
-    )
-    try:
-        yield OrganizationsService(client)
-    finally:
-        await client.close()
-
-
-@pytest_asyncio.fixture
-async def integration_organizations_v2_service(
-    settings: Settings,
-    integration_auth_session: AuthSession,
-) -> AsyncIterator[OrganizationsV2Service]:
-    client = APIClient(
-        base_url=settings.api_base_url,
-        timeout=settings.api_timeout,
-        retries=settings.api_retries,
-        retry_backoff=settings.api_retry_backoff,
-        auth_token_getter=integration_auth_session.get_token,
-        auth_token_refresher=integration_auth_session.refresh_token,
-    )
-    try:
-        yield OrganizationsV2Service(client)
-    finally:
-        await client.close()
-
-
-@pytest_asyncio.fixture
-async def integration_organizations_v1_service(settings: Settings) -> AsyncIterator[OrganizationsV1Service]:
-    client = APIClient(
-        base_url=settings.api_v1_base_url,
-        timeout=settings.api_timeout,
-        retries=settings.api_retries,
-        retry_backoff=settings.api_retry_backoff,
-    )
-    try:
-        yield OrganizationsV1Service(client)
-    finally:
-        await client.close()

@@ -1,6 +1,6 @@
 from faker import Faker
 
-from models.user_models import User, UserCreateRequest
+from models.users.models import User, UserCreateRequest
 
 
 class UserFactory:

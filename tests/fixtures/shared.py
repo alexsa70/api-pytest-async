@@ -8,9 +8,10 @@ import pytest
 from faker import Faker
 
 from config.settings import Settings
+from factories.device_factory import DeviceFactory
 from factories.organization_factory import OrganizationFactory
 from factories.user_factory import UserFactory
-from models.user_models import User
+from models.users.models import User
 
 
 @pytest.fixture(scope="session")
@@ -25,6 +26,18 @@ def faker_instance() -> Faker:
     return faker
 
 
+@pytest.fixture
+def organization_factory(faker_instance: Faker) -> OrganizationFactory:
+    return OrganizationFactory(faker_instance=faker_instance)
+
+
+@pytest.fixture(scope="session")
+def organization_response_schema() -> dict[str, Any]:
+    schema_path = Path("schemas/organization_schema.json")
+    return json.loads(schema_path.read_text(encoding="utf-8"))
+
+
+# Reference template fixtures for future user endpoints.
 @pytest.fixture
 def user_factory(faker_instance: Faker) -> UserFactory:
     return UserFactory(faker_instance=faker_instance)
@@ -44,11 +57,5 @@ def mock_users_store(user_factory: UserFactory) -> dict[int, User]:
 
 
 @pytest.fixture
-def organization_factory(faker_instance: Faker) -> OrganizationFactory:
-    return OrganizationFactory(faker_instance=faker_instance)
-
-
-@pytest.fixture(scope="session")
-def organization_response_schema() -> dict[str, Any]:
-    schema_path = Path("schemas/organization_schema.json")
-    return json.loads(schema_path.read_text(encoding="utf-8"))
+def device_factory(faker_instance: Faker) -> DeviceFactory:
+    return DeviceFactory(faker_instance=faker_instance)

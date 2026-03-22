@@ -8,8 +8,8 @@ import pytest_asyncio
 
 from clients.api_client import APIClient
 from config.settings import Settings
-from models.auth_models import AuthLoginRequest
-from services.auth_service import AuthService
+from models.auth.models import AuthLoginRequest
+from services.auth.service import AuthService
 
 
 class AuthSession:

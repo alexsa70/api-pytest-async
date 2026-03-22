@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from clients.api_client import APIClient
-from models.organization_models import OrganizationCreateRequest
-from models.organization_v2_models import (
+from models.organizations.models import OrganizationCreateRequest
+from models.organizations.v2_models import (
     OrganizationV2CreateResponse,
     OrganizationV2GetResponse,
     OrganizationV2PatchRequest,

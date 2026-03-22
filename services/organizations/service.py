@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from clients.api_client import APIClient
-from models.organization_models import OrganizationCreateRequest, OrganizationResponse
+from models.organizations.models import OrganizationCreateRequest, OrganizationResponse
 from utils.endpoints import ORGANIZATIONS
 
 

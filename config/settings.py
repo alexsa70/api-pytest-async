@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     run_fuzz: bool = Field(default=False, alias="RUN_FUZZ")
     run_integration: bool = Field(default=False, alias="RUN_INTEGRATION")
     env: str = Field(default="local", alias="ENV")
+    test_device_imei: str | None = Field(default=None, alias="TEST_DEVICE_IMEI")
+
 
     auth_username: str = Field(default="qa_user", alias="AUTH_USERNAME")
     auth_password: str = Field(default="qa_password", alias="AUTH_PASSWORD")

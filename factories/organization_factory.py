@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from faker import Faker
 
-from models.organization_models import OrganizationCreateRequest
+from models.organizations.models import OrganizationCreateRequest
 
 
 class OrganizationFactory:

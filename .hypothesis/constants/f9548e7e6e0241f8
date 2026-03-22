@@ -1,0 +1,4 @@
+# file: /Users/alex.lechtchinski/mywork_repos/api-test-async/config/settings.py
+# hypothesis_version: 6.151.9
+
+[0.2, 10.0, '.env', 'API_BASE_URL', 'API_RETRIES', 'API_RETRY_BACKOFF', 'API_TIMEOUT', 'API_V1_BASE_URL', 'AUTH_PASSWORD', 'AUTH_USERNAME', 'ENV', 'OPENAPI_PATH', 'RUN_FUZZ', 'RUN_INTEGRATION', 'TEST_DEVICE_IMEI', 'ignore', 'local', 'openapi/openapi.json', 'qa_password', 'qa_user', 'utf-8']

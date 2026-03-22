@@ -6,9 +6,9 @@ import pytest
 
 from config.settings import Settings
 from factories.organization_factory import OrganizationFactory
-from models.organization_v2_models import OrganizationV2PatchRequest
-from services.organizations_v1_service import OrganizationsV1Service
-from services.organizations_v2_service import OrganizationsV2Service
+from models.organizations.v2_models import OrganizationV2PatchRequest
+from services.organizations.v1_service import OrganizationsV1Service
+from services.organizations.v2_service import OrganizationsV2Service
 from tests.fixtures.auth import AuthSession
 
 

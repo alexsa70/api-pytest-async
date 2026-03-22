@@ -1,5 +1,5 @@
 from clients.api_client import APIClient
-from models.auth_models import AuthLoginRequest, AuthTokenResponse
+from models.auth.models import AuthLoginRequest, AuthTokenResponse
 from utils.endpoints import AUTH_LOGIN
 
 

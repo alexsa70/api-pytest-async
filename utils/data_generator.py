@@ -1,6 +1,6 @@
 from faker import Faker
 
-from models.user_models import UserCreateRequest
+from models.users.models import UserCreateRequest
 
 
 class DataGenerator:

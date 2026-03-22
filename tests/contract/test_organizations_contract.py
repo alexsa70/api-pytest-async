@@ -4,8 +4,8 @@ import allure
 import pytest
 
 from factories.organization_factory import OrganizationFactory
-from models.organization_models import OrganizationResponse
-from services.organizations_service import OrganizationsService
+from models.organizations.models import OrganizationResponse
+from services.organizations.service import OrganizationsService
 from utils.validators import validate_response
 
 

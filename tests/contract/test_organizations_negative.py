@@ -4,7 +4,7 @@ import httpx
 import pytest
 
 from clients.api_client import APIClient
-from services.organizations_service import OrganizationsService
+from services.organizations.service import OrganizationsService
 from utils.assertions import assert_status_code
 from utils.endpoints import ORGANIZATIONS
 
@@ -79,7 +79,7 @@ async def test_create_organization_raises_on_unexpected_status(
     # OrganizationsService.create_organization uses expected_status=201.
     # A 403 response (guest role) should raise HTTPStatusError.
     with pytest.raises(httpx.HTTPStatusError):
-        from models.organization_models import OrganizationCreateRequest
+        from models.organizations.models import OrganizationCreateRequest
 
         payload = OrganizationCreateRequest(name="Acme", exclusivePartnerOnly=False)
         # Bypass the service to inject the guest header, then confirm the

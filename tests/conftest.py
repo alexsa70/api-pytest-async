@@ -1,5 +1,9 @@
 pytest_plugins = [
-    "tests.fixtures.data",
     "tests.fixtures.auth",
-    "tests.fixtures.api",
+    "tests.fixtures.shared",
+    "tests.fixtures.mocks",
+    "tests.fixtures.clients",
+    "tests.fixtures.services_organizations",
+    "tests.fixtures.services_devices",
+    "tests.fixtures.services_users",
 ]

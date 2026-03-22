@@ -4,7 +4,7 @@ import allure
 import pytest
 
 from factories.organization_factory import OrganizationFactory
-from services.organizations_service import OrganizationsService
+from services.organizations.service import OrganizationsService
 
 
 @allure.epic("Organizations API")

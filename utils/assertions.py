@@ -1,6 +1,6 @@
 import httpx
 
-from models.user_models import User, UserResponse
+from models.users.models import User, UserResponse
 
 
 def assert_status_code(response: httpx.Response, expected_status: int) -> None:

@@ -1,15 +1,22 @@
-# Test Template (Copy/Paste)
+# Test Template (New Structure, Copy/Paste)
 
-Используй этот шаблон для добавления нового endpoint-теста из `openapi.yaml`.
+Используй этот шаблон для добавления endpoint по новой доменной структуре.
+
+## Structure
+
+- `models/<domain>/models.py`
+- `services/<domain>/service.py`
+- `tests/fixtures/services_<domain>.py`
+- `tests/fixtures/shared.py` (factory/schema/общие данные)
+- `tests/smoke/`, `tests/contract/`, `tests/integration/`
 
 ## 1) Endpoint constants (`utils/endpoints.py`)
 
 ```python
-# Example: /devices/{imei}
-DEVICE_BY_ID = "/devices/{imei}"
+DEVICE_BY_IMEI = "/devices/{imei}"
 ```
 
-## 2) Models (`models/device_models.py`)
+## 2) Models (`models/devices/models.py`)
 
 ```python
 from __future__ import annotations
@@ -18,7 +25,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class DevicePatchRequest(BaseModel):
-    # Align with OpenAPI requestBody
     name: str | None = Field(default=None, min_length=1)
     enabled: bool | None = None
 
@@ -26,7 +32,6 @@ class DevicePatchRequest(BaseModel):
 
 
 class DeviceData(BaseModel):
-    # Align with OpenAPI response schema
     imei: str = Field(min_length=1)
     name: str = Field(min_length=1)
     enabled: bool
@@ -41,14 +46,14 @@ class DeviceGetResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 ```
 
-## 3) Service (`services/devices_service.py`)
+## 3) Service (`services/devices/service.py`)
 
 ```python
 from __future__ import annotations
 
 from clients.api_client import APIClient
-from models.device_models import DeviceGetResponse, DevicePatchRequest
-from utils.endpoints import DEVICE_BY_ID
+from models.devices.models import DeviceGetResponse, DevicePatchRequest
+from utils.endpoints import DEVICE_BY_IMEI
 
 
 class DevicesService:
@@ -57,14 +62,14 @@ class DevicesService:
 
     async def get_device(self, imei: str) -> DeviceGetResponse:
         response = await self.api_client.get(
-            DEVICE_BY_ID.format(imei=imei),
+            DEVICE_BY_IMEI.format(imei=imei),
             expected_status=200,
         )
         return DeviceGetResponse.model_validate(response.json())
 
     async def patch_device(self, imei: str, payload: DevicePatchRequest) -> None:
         await self.api_client.patch(
-            DEVICE_BY_ID.format(imei=imei),
+            DEVICE_BY_IMEI.format(imei=imei),
             json=payload.model_dump(by_alias=True, exclude_none=True),
             expected_status=200,
         )
@@ -77,7 +82,7 @@ from __future__ import annotations
 
 from faker import Faker
 
-from models.device_models import DevicePatchRequest
+from models.devices.models import DevicePatchRequest
 
 
 class DeviceFactory:
@@ -91,9 +96,9 @@ class DeviceFactory:
         )
 ```
 
-## 5) Fixtures (`tests/fixtures/data.py` + `tests/fixtures/api.py`)
+## 5) Fixtures
 
-`tests/fixtures/data.py`:
+`tests/fixtures/shared.py`:
 
 ```python
 import pytest
@@ -105,11 +110,11 @@ def device_factory(faker_instance):
     return DeviceFactory(faker_instance=faker_instance)
 ```
 
-`tests/fixtures/api.py`:
+`tests/fixtures/services_devices.py`:
 
 ```python
 import pytest_asyncio
-from services.devices_service import DevicesService
+from services.devices.service import DevicesService
 
 
 @pytest_asyncio.fixture
@@ -122,6 +127,20 @@ async def integration_devices_service(integration_client):
     return DevicesService(integration_client)
 ```
 
+`tests/conftest.py` (проверь, что модуль подключен):
+
+```python
+pytest_plugins = [
+    "tests.fixtures.auth",
+    "tests.fixtures.shared",
+    "tests.fixtures.mocks",
+    "tests.fixtures.clients",
+    "tests.fixtures.services_organizations",
+    "tests.fixtures.services_devices",
+    "tests.fixtures.services_users",  # optional template
+]
+```
+
 ## 6) Smoke test (`tests/smoke/test_devices_smoke.py`)
 
 ```python
@@ -129,26 +148,25 @@ from __future__ import annotations
 
 import pytest
 
-from services.devices_service import DevicesService
+from services.devices.service import DevicesService
 
 
 @pytest.mark.smoke
 @pytest.mark.asyncio
 async def test_get_device_smoke(devices_service: DevicesService) -> None:
-    # Use existing stable test IMEI for mock flow
     device = await devices_service.get_device("123456789012345")
     assert device.data.imei
 ```
 
-## 7) Contract tests (`tests/contract/test_devices_contract.py`)
+## 7) Contract test (`tests/contract/test_devices_contract.py`)
 
 ```python
 from __future__ import annotations
 
 import pytest
 
-from models.device_models import DeviceGetResponse
-from services.devices_service import DevicesService
+from models.devices.models import DeviceGetResponse
+from services.devices.service import DevicesService
 
 
 @pytest.mark.contract
@@ -159,7 +177,7 @@ async def test_get_device_contract(devices_service: DevicesService) -> None:
     assert reparsed.data.imei == response.data.imei
 ```
 
-## 8) Negative tests (`tests/contract/test_devices_negative.py`)
+## 8) Negative test (`tests/contract/test_devices_negative.py`)
 
 ```python
 from __future__ import annotations
@@ -168,7 +186,7 @@ import pytest
 
 from clients.api_client import APIClient
 from utils.assertions import assert_status_code
-from utils.endpoints import DEVICE_BY_ID
+from utils.endpoints import DEVICE_BY_IMEI
 
 
 @pytest.mark.contract
@@ -180,7 +198,7 @@ async def test_get_device_401_without_token(settings, mock_transport) -> None:
         timeout=settings.api_timeout,
         transport=mock_transport,
     ) as raw_client:
-        response = await raw_client.get(DEVICE_BY_ID.format(imei="123"))
+        response = await raw_client.get(DEVICE_BY_IMEI.format(imei="123"))
     assert_status_code(response, 401)
 ```
 
@@ -192,8 +210,8 @@ from __future__ import annotations
 import pytest
 
 from config.settings import Settings
-from models.device_models import DevicePatchRequest
-from services.devices_service import DevicesService
+from models.devices.models import DevicePatchRequest
+from services.devices.service import DevicesService
 
 
 @pytest.mark.integration
@@ -215,7 +233,6 @@ async def test_real_api_device_e2e_read_modify_verify(
         updated = await integration_devices_service.get_device(imei)
         assert updated.data.name == updated_name
     finally:
-        # Cleanup: rollback change even if assertion fails
         await integration_devices_service.patch_device(
             imei,
             DevicePatchRequest(name=original_name),
@@ -233,7 +250,8 @@ pytest --alluredir=allure-results && allure serve allure-results
 
 ## Quick Checklist
 
-- Endpoint + method + statuses совпадают с `openapi.yaml`.
-- Все camelCase поля покрыты `alias`.
+- Endpoint/method/statuses совпадают с `openapi.yaml`.
+- `alias` для camelCase полей добавлены.
 - Есть минимум: `smoke + contract + negative`.
-- В `integration` есть cleanup в `finally`.
+- В `integration` есть cleanup через `finally`.
+- Fixture для нового домена подключена в `tests/conftest.py`.

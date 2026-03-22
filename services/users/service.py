@@ -1,5 +1,5 @@
 from clients.api_client import APIClient
-from models.user_models import UserCreateRequest, UserListResponse, UserResponse
+from models.users.models import UserCreateRequest, UserListResponse, UserResponse
 from utils.endpoints import USER_BY_ID, USERS
 
 
